@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Medicine Cyber Incident — Facilitated Training</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --panel-l:       #1b3829;
+            --panel-r:       #f5f2ec;
+            --accent:        #3a8c68;
+            --accent-pale:   #d4ece2;
+            --accent-bright: #7ecaa8;
+            --warning:       #c07030;
+            --warning-bg:    rgba(192,112,48,0.15);
+            --info-bg:       rgba(58,140,104,0.16);
+            --text-dark:     #1a1a1a;
+            --text-mid:      #4a4a4a;
+            --border-light:  #d8d2c8;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--panel-l);
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ══════════════════════════════════════
+           TOP BAR
+        ══════════════════════════════════════ */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.28);
+            padding: 0 36px;
+            height: 54px;
+            flex-shrink: 0;
+            gap: 32px;
+        }
+
+        .topbar-title {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+            white-space: nowrap;
+        }
+
+        .topbar-title em { opacity: 0.35; margin: 0 10px; font-style: normal; }
+
+        .step-pips { display: flex; align-items: center; gap: 8px; }
+
+        .pip {
+            width: 32px;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.13);
+            transition: background 0.4s ease;
+        }
+        .pip.done   { background: var(--accent-bright); }
+        .pip.active { background: rgba(255,255,255,0.65); }
+
+        .step-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.38);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
+
+        /* ══════════════════════════════════════
+           ROLE SWITCH OVERLAY
+        ══════════════════════════════════════ */
+        .role-switch-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .role-switch-card {
+            background: var(--panel-l);
+            border: 2px solid var(--accent-bright);
+            border-radius: 20px;
+            padding: 52px 64px;
+            text-align: center;
+            max-width: 520px;
+            width: 90%;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+            animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.88); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .role-switch-eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--accent-bright);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .role-switch-eyebrow::before,
+        .role-switch-eyebrow::after {
+            content: '';
+            width: 32px;
+            height: 1px;
+            background: var(--accent-bright);
+            opacity: 0.5;
+        }
+
+        .role-switch-name {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 38px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 12px;
+            line-height: 1.15;
+        }
+
+        .role-switch-desc {
+            font-size: 16px;
+            color: rgba(255,255,255,0.55);
+            margin-bottom: 36px;
+            line-height: 1.6;
+        }
+
+        .role-switch-btn {
+            background: var(--accent-bright);
+            color: #0d2a1e;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: all 0.2s;
+        }
+        .role-switch-btn:hover { background: #a0dcc0; transform: translateY(-1px); }
+
+        /* ══════════════════════════════════════
+           MAIN PANELS
+        ══════════════════════════════════════ */
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* LEFT — scenario narrative */
+        .panel-left {
+            width: 50%;
+            background: var(--panel-l);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 32px 38px 28px;
+            border-right: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .left-header { flex-shrink: 0; margin-bottom: 20px; }
+
+        .role-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.09);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: rgba(255,255,255,0.82);
+            padding: 6px 16px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            margin-bottom: 14px;
+        }
+
+        .scenario-title {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 30px;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .left-body {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-right: 8px;
+        }
+        .left-body::-webkit-scrollbar { width: 3px; }
+        .left-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+        .context-text {
+            font-size: 17px;
+            color: rgba(255,255,255,0.62);
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        .dialogue {
+            background: rgba(0,0,0,0.22);
+            border-radius: 12px;
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .dl-speaker {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent-bright);
+            margin-bottom: 4px;
+        }
+        .dl-speaker .note {
+            font-weight: 400;
+            color: rgba(255,255,255,0.32);
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 12px;
+        }
+
+        .dl-text {
+            font-size: 16px;
+            color: rgba(255,255,255,0.88);
+            line-height: 1.65;
+        }
+
+        .dl-note {
+            font-style: italic;
+            font-size: 14px;
+            color: rgba(255,255,255,0.38);
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            padding-top: 12px;
+        }
+
+        .alert-box {
+            background: var(--warning-bg);
+            border-left: 3px solid var(--warning);
+            padding: 13px 18px;
+            border-radius: 0 8px 8px 0;
+        }
+        .info-box {
+            background: var(--info-bg);
+            border-left: 3px solid var(--accent-bright);
+            padding: 13px 18px;
+            border-radius: 0 8px 8px 0;
+        }
+        .box-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 5px;
+        }
+        .alert-box .box-label { color: #e8a060; }
+        .info-box  .box-label { color: var(--accent-bright); }
+        .box-text {
+            font-size: 15px;
+            color: rgba(255,255,255,0.78);
+            line-height: 1.6;
+        }
+
+        /* RIGHT — facilitation panel */
+        .panel-right {
+            width: 50%;
+            background: var(--panel-r);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 32px 38px 28px;
+            gap: 0;
+        }
+
+        .question-eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .question-text {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.35;
+            color: var(--text-dark);
+            flex-shrink: 0;
+            /* fill available space pushing inputs to bottom */
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Inputs area — pinned toward bottom */
+        .inputs-area {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
+            margin-top: 24px;
+        }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-mid);
+            margin-bottom: 7px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .field-label span {
+            font-weight: 400;
+            font-size: 11px;
+            color: #aaa;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .answer-textarea {
+            width: 100%;
+            background: #fff;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-family: inherit;
+            color: var(--text-dark);
+            line-height: 1.55;
+            resize: none;
+            height: 130px;
+            transition: border-color 0.15s;
+        }
+        .answer-textarea:focus { outline: none; border-color: var(--accent); }
+
+        .notes-textarea {
+            width: 100%;
+            background: #fffbf0;
+            border: 2px solid #e8d89a;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text-dark);
+            line-height: 1.55;
+            resize: none;
+            height: 110px;
+            transition: border-color 0.15s;
+        }
+        .notes-textarea:focus { outline: none; border-color: #c8a830; }
+
+        .btn {
+            background: var(--panel-l);
+            color: #fff;
+            border: none;
+            padding: 15px 32px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+            transition: all 0.2s;
+            align-self: flex-start;
+        }
+        .btn:hover { background: #0d1f15; transform: translateY(-1px); }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-mid);
+            border: 2px solid var(--border-light);
+        }
+        .btn-outline:hover { background: var(--border-light); transform: none; }
+
+        /* ══════════════════════════════════════
+           REVIEW SCREEN
+        ══════════════════════════════════════ */
+        .review-wrap {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .review-left {
+            width: 50%;
+            background: var(--panel-l);
+            padding: 32px 38px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            border-right: 1px solid rgba(255,255,255,0.07);
+        }
+        .review-left::-webkit-scrollbar { width: 3px; }
+        .review-left::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+        .review-right {
+            width: 50%;
+            background: var(--panel-r);
+            padding: 32px 38px;
+            overflow-y: auto;
+        }
+        .review-right::-webkit-scrollbar { width: 3px; }
+        .review-right::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+
+        .review-heading {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 30px;
+            font-weight: 600;
+            color: #fff;
+        }
+        .review-sub { font-size: 15px; color: rgba(255,255,255,0.4); }
+
+        .review-meta {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.45);
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .review-meta strong { color: rgba(255,255,255,0.72); }
+
+        .step-card {
+            background: rgba(0,0,0,0.18);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .step-card-header {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 14px 18px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .step-card-num {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--accent-bright);
+        }
+        .step-card-title {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 16px;
+            color: #fff;
+        }
+        .step-card-role {
+            font-size: 12px;
+            color: rgba(255,255,255,0.35);
+            margin-left: auto;
+        }
+
+        .step-card-body {
+            padding: 14px 18px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step-field-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 4px;
+        }
+        .field-answer   .step-field-label { color: rgba(255,255,255,0.38); }
+        .field-question .step-field-label { color: var(--accent-bright); opacity: 0.7; }
+        .field-notes    .step-field-label { color: #c8a830; }
+
+        .step-field-text {
+            font-size: 14px;
+            color: rgba(255,255,255,0.72);
+            line-height: 1.6;
+        }
+        .field-notes .step-field-text { color: #e8cc70; }
+        .field-question .step-field-text { font-style: italic; color: rgba(255,255,255,0.45); font-size: 13px; }
+
+        /* Right review panel */
+        .actions-heading {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+        .actions-sub {
+            font-size: 15px;
+            color: var(--text-mid);
+            margin-bottom: 24px;
+            line-height: 1.65;
+        }
+        .action-card {
+            background: #fff;
+            border: 1.5px solid var(--border-light);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+        }
+        .action-card-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+        .action-card-text {
+            font-size: 15px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        .no-actions {
+            font-size: 15px;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .review-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .hidden { display: none !important; }
+
+        /* ══════════════════════════════════════
+           PARTICIPANTS BOX
+        ══════════════════════════════════════ */
+        .participants-box {
+            background: #fff;
+            border: 1.5px solid var(--border-light);
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+        }
+
+        .participants-box .p-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .participants-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .p-field label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-mid);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .p-field input {
+            width: 100%;
+            border: 1.5px solid var(--border-light);
+            border-radius: 7px;
+            padding: 9px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-dark);
+            background: #fafafa;
+            transition: border-color 0.15s;
+        }
+
+        .p-field input:focus { outline: none; border-color: var(--accent); }
+
+        .p-field.full { grid-column: 1 / -1; }
+
+        /* ══════════════════════════════════════
+           PRINT STYLES
+        ══════════════════════════════════════ */
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            html, body {
+                height: auto;
+                overflow: visible;
+                background: #fff;
+                font-size: 11pt;
+            }
+
+            .app { height: auto; overflow: visible; }
+            .topbar, .scenario-main, #scenario-main { display: none !important; }
+
+            .review-wrap {
+                display: block !important;
+                height: auto;
+                overflow: visible;
+            }
+
+            .review-left,
+            .review-right {
+                width: 100%;
+                height: auto;
+                overflow: visible;
+                padding: 0;
+                background: #fff !important;
+                border: none;
+            }
+
+            /* Print header */
+            .review-left::before {
+                content: 'Nuclear Medicine Department — Transport Emergency Training';
+                display: block;
+                font-family: Georgia, serif;
+                font-size: 16pt;
+                font-weight: 600;
+                color: #1b3829;
+                border-bottom: 2px solid #1b3829;
+                padding-bottom: 8pt;
+                margin-bottom: 16pt;
+            }
+
+            /* Session details strip */
+            .review-heading,
+            .review-sub  { display: none; }
+
+            .review-meta {
+                display: flex;
+                gap: 24pt;
+                font-size: 10pt;
+                color: #444;
+                padding-bottom: 10pt;
+                border-bottom: 1px solid #ccc;
+                margin-bottom: 16pt;
+            }
+
+            /* Step cards */
+            .step-card {
+                background: #fff !important;
+                border: 1px solid #ccc;
+                border-radius: 6pt;
+                margin-bottom: 14pt;
+                page-break-inside: avoid;
+                overflow: visible;
+            }
+
+            .step-card-header {
+                background: #f0f0f0 !important;
+                padding: 8pt 12pt;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .step-card-num   { color: #3a8c68 !important; font-size: 9pt; }
+            .step-card-title { color: #1a1a1a !important; font-size: 12pt; }
+            .step-card-role  { color: #555    !important; font-size: 9pt; }
+
+            .step-card-body { padding: 10pt 12pt; }
+
+            .step-field-label { font-size: 8pt; margin-bottom: 3pt; }
+            .field-answer   .step-field-label { color: #888    !important; }
+            .field-question .step-field-label { color: #3a8c68 !important; }
+            .field-notes    .step-field-label { color: #b08020 !important; }
+
+            .step-field-text {
+                font-size: 10pt;
+                color: #222 !important;
+                line-height: 1.5;
+                white-space: pre-wrap;
+                word-break: break-word;
+            }
+
+            .field-notes .step-field-text { color: #6b4e00 !important; }
+            .field-question .step-field-text { color: #444 !important; font-style: italic; }
+
+            /* Participants box */
+            .participants-box {
+                background: #fff !important;
+                border: 1px solid #ccc;
+                border-radius: 6pt;
+                padding: 10pt 12pt;
+                margin-bottom: 14pt;
+                page-break-inside: avoid;
+            }
+
+            .participants-box .p-label { color: #3a8c68 !important; font-size: 9pt; }
+            .participants-grid { gap: 8pt; }
+            .p-field label { font-size: 9pt; color: #555; }
+            .p-field input {
+                border: 1px solid #ccc;
+                background: #fafafa !important;
+                font-size: 10pt;
+                padding: 5pt 8pt;
+            }
+
+            /* Actions section */
+            .actions-heading { font-size: 14pt; color: #1a1a1a; margin-top: 16pt; margin-bottom: 6pt; }
+            .actions-sub     { font-size: 10pt; color: #555; margin-bottom: 12pt; }
+
+            .action-card {
+                background: #fff !important;
+                border: 1px solid #ccc;
+                border-radius: 6pt;
+                padding: 10pt 12pt;
+                margin-bottom: 10pt;
+                page-break-inside: avoid;
+            }
+
+            .action-card-label { color: #3a8c68 !important; font-size: 9pt; }
+            .action-card-text  { font-size: 10pt; color: #222; line-height: 1.5; }
+
+            .review-btns { display: none !important; }
+
+            /* Force review-right to print after review-left */
+            .review-right { margin-top: 8pt; border-top: 1px solid #ccc; padding-top: 12pt; }
+        }
+    
+        /* Mobile layout for QR-code / phone use */
+        @media screen and (max-width: 820px) {
+            html, body {
+                height: auto;
+                min-height: 100%;
+                overflow: auto;
+            }
+
+            .app {
+                height: auto;
+                min-height: 100vh;
+                overflow: visible;
+            }
+
+            .topbar {
+                position: sticky;
+                top: 0;
+                z-index: 60;
+                height: auto;
+                min-height: 54px;
+                padding: 10px 14px;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .topbar-title {
+                font-size: 13px;
+                white-space: normal;
+                line-height: 1.35;
+                flex: 1 1 180px;
+            }
+
+            .topbar-title em { margin: 0 5px; }
+
+            .step-pips { gap: 4px; }
+            .pip { width: 18px; height: 4px; }
+            .step-label {
+                font-size: 10px;
+                margin-left: 2px;
+                white-space: nowrap;
+            }
+
+            .main {
+                display: flex;
+                flex-direction: column;
+                overflow: visible;
+            }
+
+            .panel-left,
+            .panel-right {
+                width: 100%;
+                height: auto;
+                overflow: visible;
+                padding: 24px 18px;
+            }
+
+            .panel-left {
+                border-right: none;
+                border-bottom: 1px solid rgba(255,255,255,0.10);
+            }
+
+            .left-header { margin-bottom: 16px; }
+            .scenario-title { font-size: 27px; }
+
+            .left-body {
+                overflow: visible;
+                padding-right: 0;
+            }
+
+            .context-text { font-size: 16px; }
+            .dl-text { font-size: 15px; }
+
+            .question-text {
+                display: block;
+                flex: none;
+                font-size: 22px;
+                margin-bottom: 22px;
+            }
+
+            .inputs-area {
+                padding-top: 20px;
+                margin-top: 0;
+            }
+
+            .answer-textarea,
+            .notes-textarea {
+                height: 120px;
+                font-size: 16px;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+                align-self: stretch;
+            }
+
+            .review-wrap {
+                flex-direction: column;
+                overflow: visible;
+            }
+
+            .review-left,
+            .review-right {
+                width: 100%;
+                height: auto;
+                overflow: visible;
+                padding: 24px 18px;
+            }
+
+            .review-left {
+                border-right: none;
+                border-bottom: 1px solid rgba(255,255,255,0.10);
+            }
+
+            .review-meta {
+                flex-wrap: wrap;
+                gap: 10px 18px;
+            }
+
+            .step-card-header {
+                flex-wrap: wrap;
+            }
+
+            .step-card-role {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 4px;
+            }
+
+            .participants-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .review-btns {
+                flex-direction: column;
+            }
+
+            .role-switch-card {
+                width: calc(100% - 32px);
+                padding: 34px 22px;
+                border-radius: 16px;
+            }
+
+            .role-switch-name {
+                font-size: 30px;
+            }
+
+            .role-switch-desc {
+                font-size: 15px;
+                margin-bottom: 26px;
+            }
+
+            .role-switch-btn {
+                width: 100%;
+                padding: 15px 18px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <div class="topbar">
+        <div class="topbar-title">
+            Nuclear Medicine Training
+            <em>|</em>
+            Cyber Incident — Facilitated Session
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div class="step-pips" id="step-pips"></div>
+            <div class="step-label"  id="step-label">Step 1 of 5</div>
+        </div>
+    </div>
+
+    <div class="main" id="scenario-main">
+        <div class="panel-left"  id="panel-left"></div>
+        <div class="panel-right" id="panel-right"></div>
+    </div>
+
+    <div class="review-wrap hidden" id="review-wrap">
+        <div class="review-left"  id="review-left"></div>
+        <div class="review-right" id="review-right"></div>
+    </div>
+
+</div>
+<script>
+class Training {
+    constructor() {
+        this.step      = 0;
+        this.records   = [];
+        this.startTime = Date.now();
+
+        this.scenarios = [
+            {
+                id: 1,
+                role: "NM Technologist",
+                context: "Nuclear Medicine Dept · Wednesday 9:52 AM",
+                title: "The Screen Goes Blank",
+                intro: "You're three patients into a busy morning list — a bone scan, a MAG3, and a DaTSCAN just about to start. You've pulled up the DaTSCAN patient in EPIC to check the referral and confirm the clinical indication. Mid-page, EPIC freezes. You refresh. Nothing. You try logging out and back in — the login screen hangs indefinitely.",
+                dialogue: [
+                    { speaker: "You (to colleague across the room)", text: '"Have you lost EPIC? Mine\'s completely frozen."' },
+                    { speaker: "Colleague", note: "also staring at screen", text: '"Yes — and the PACS viewer just crashed too. I thought it was just me. I\'ve got a patient in the gamma camera right now."' },
+                    { speaker: "You", text: '"I\'ll call IT."' },
+                    { speaker: "IT Helpdesk", note: "unusually terse", text: '"We\'re aware. Do not restart your machines. Do not attempt to log in again. We\'re dealing with a significant network incident. More information shortly."' }
+                ],
+                dialogueNote: "The call ends abruptly. The DaTSCAN patient is sitting in the waiting room. You have radiopharmaceuticals already prepared and time-critical. You have no access to the patient's referral, history, allergies, or previous imaging.",
+                alerts: [
+                    { label: "Immediate Patient Safety Issue", text: "A DaTSCAN is ready to inject. You cannot verify the clinical indication, current medications (e.g. dopaminergic drugs that could invalidate the scan), or consent status in EPIC." }
+                ],
+                question: "EPIC and PACS are both down, IT have told you not to touch your machines, and you have a prepared radiopharmaceutical and a patient ready to scan. What do you do right now?"
+            },
+            {
+                id: 2,
+                role: "NM Consultant / Clinician",
+                roleSwitch: true,
+                roleSwitchDesc: "You've just been bleeped urgently by the NM department. You were mid-ward round and have no access to hospital systems either — the bleep came via a runner.",
+                title: "Clinical Decisions Without a Safety Net",
+                intro: "You've arrived in the department. Three patients are now affected: the DaTSCAN patient waiting, a MAG3 already in progress, and a SPECT/CT booked in 20 minutes for a patient with suspected PE. All electronic records are inaccessible. The technologists are looking to you.",
+                dialogue: [
+                    { speaker: "NM Technologist", text: '"The DaTSCAN patient says he stopped his Ropinirole three days ago as instructed — but we can\'t verify that in the notes. He\'s travelled two hours to get here."' },
+                    { speaker: "You", text: '"And the PE patient?"' },
+                    { speaker: "NM Technologist", text: '"She\'s been brought down from cardiology. The porter says the request was urgent — possible submassive PE — but we have no referral, no recent bloods, no eGFR for the CT contrast decision. Cardiology aren\'t answering their phone."' }
+                ],
+                dialogueNote: "You have no access to any electronic system. The paper request forms used prior to EPIC digitisation were discontinued 18 months ago.",
+                info: [
+                    { label: "What You Do Have", text: "The patient themselves · Any physical documents they brought · Your clinical judgement · Colleagues reachable by personal mobile" }
+                ],
+                alerts: [
+                    { label: "Evolving Incident", text: "IT have now confirmed this is a ransomware attack affecting the whole hospital network. Estimated recovery time: unknown. They advise treating all systems as compromised." }
+                ],
+                question: "You must make clinical decisions for three patients without any electronic records or verified referral information. How do you triage these patients, what do you do for each, and how do you document your decision-making?"
+            },
+            {
+                id: 3,
+                role: "Radiopharmacist",
+                roleSwitch: true,
+                roleSwitchDesc: "You were mid-batch when the network went down. Your dispensary production software has just lost connection — and you have doses already in preparation for this afternoon's list.",
+                title: "The Dispensary Goes Dark",
+                intro: "Current time: 10:25 AM. Your radiopharmacy production management software — which runs on the Trust network — has dropped offline along with everything else. It manages batch records, dispensing logs, activity calculations, patient dose assignments, and your audit trail. You have three doses part-way through preparation and an afternoon list that starts at 1:00 PM.",
+                dialogue: [
+                    { speaker: "Radiopharmacy Technician", text: '"The software\'s gone. I was halfway through logging the Tc-99m sestamibi batch. The activity calculations are on screen — or they were. I can\'t tell if it saved."' },
+                    { speaker: "You", text: '"What do we have physically prepared right now?"' },
+                    { speaker: "Radiopharmacy Technician", text: '"Two MDP doses already dispensed and labelled — they\'re in the hot lab. One sestamibi mid-prep. And we\'ve got an F-18 FDG delivery due at 11:00 that we\'d normally book in through the software."' },
+                    { speaker: "You", text: '"And our paper backup forms?"' },
+                    { speaker: "Radiopharmacy Technician", note: "pause", text: '"We haven\'t used them since the new system went live. I\'m not sure where they are."' }
+                ],
+                dialogueNote: "The two MDP doses are time-critical — they were dispensed for specific patients at specific activities. Without the software record you cannot confirm which dose belongs to which patient, or verify the dispensed activity against the prescription.",
+                alerts: [
+                    { label: "Regulatory Risk", text: "GMP and IR(ME)R require a complete and contemporaneous record of every dispensed radiopharmaceutical dose. A gap in your audit trail — even during a cyber incident — is a potential reportable event." },
+                    { label: "Afternoon List at Risk", text: "If the software remains down, you have no validated method to assign, calculate, or record doses for the 1:00 PM list. The Medical Physicist is asking whether you can continue dispensing at all." }
+                ],
+                question: "You have unlabelled doses, a broken audit trail, an incoming delivery, and an afternoon list to supply. What do you do about the already-prepared doses, how do you handle the FDG delivery, and what do you need to put in place before you dispense anything else?"
+            },
+            {
+                id: 4,
+                role: "Medical Physicist",
+                roleSwitch: true,
+                roleSwitchDesc: "You've been pulled into an urgent departmental meeting. The ransomware attack is confirmed hospital-wide. You're now responsible for the department's technical and radiation safety response.",
+                title: "The Physics of Going Dark",
+                intro: "Current time: 11:30 AM. EPIC, PACS, the NM-specific PACS, dose tracking software, and the RIS are all offline. The gamma cameras themselves are functioning — they run on isolated systems — but image acquisition is now producing data with nowhere to send it. QC records, calibration logs, and the department's radiation protection documentation are all on networked drives.",
+                dialogue: [
+                    { speaker: "NM Technologist", text: '"We\'ve got three completed studies sitting on the acquisition workstation. If we can\'t transfer them to PACS, how long can we hold them there? And can we still report — can the consultant read off the acquisition screen?"' },
+                    { speaker: "Radiopharmacy", note: "by phone", text: '"We\'ve had to switch to paper dispensing records. But our decay correction software is cloud-linked and it\'s gone. We\'re doing manual decay calculations. Do you want to verify them before we dispense anything else?"' }
+                ],
+                alerts: [
+                    { label: "Radiation Protection Issue", text: "Your routine source QC was due this morning. The results are locked inside the QC software on the networked workstation. You cannot confirm the gamma camera is in specification." },
+                    { label: "IT Security Advisory", text: "Trust IT have instructed that NO data is to be transferred via personal USB drives, personal email, or any non-approved workaround, as these could spread the ransomware further." }
+                ],
+                question: "You need to maintain radiation safety, support ongoing clinical care, and not compromise the IT security response. How do you manage image data custody, verify radiopharmacy dose calculations, and handle the outstanding QC — and what do you record, and how?"
+            },
+            {
+                id: 5,
+                role: "Clinical Nurse Specialist",
+                roleSwitch: true,
+                roleSwitchDesc: "You've been coordinating patient communication and ward liaison throughout the morning. It's now early afternoon and the department is still running on paper.",
+                title: "The Human Cost",
+                intro: "Current time: 2:15 PM. Systems remain down. The department has seen 6 patients today instead of the usual 18. Four appointments were cancelled at the door. One patient — a cancer staging scan — has been asked to return tomorrow, but lives 90 miles away and has an oncology MDT on Friday that depends on the result.",
+                dialogue: [
+                    { speaker: "Oncology patient", note: "distressed", text: '"If my scan isn\'t done today, will they have the result for Friday? My surgeon said this was urgent. I\'ve arranged childcare, taken annual leave, driven 90 miles…"' },
+                    { speaker: "You", text: '"I completely understand — let me find out what\'s possible and come back to you within 15 minutes."' },
+                    { speaker: "Referring oncology CNS (via personal mobile)", text: '"Can you get her done today? Even if PACS is down, could the consultant dictate a provisional report? The MDT won\'t wait — it\'s a fixed slot."' }
+                ],
+                dialogueNote: "The consultant is still in the department but exhausted. Two technologists have hit their legal working hours limit. The morning's paper records need consolidating before anyone leaves — but there's no confirmed process for doing that.",
+                alerts: [
+                    { label: "Governance Gap", text: "No paper trail yet exists for today's clinical decisions, dose records, or cancelled appointments. If systems don't recover overnight, tomorrow morning will start with no handover information in any system." },
+                    { label: "Staff Wellbeing", text: "The team has been operating under high stress with improvised processes for over four hours. Two staff members have not had a break." }
+                ],
+                question: "How do you handle this patient's situation, what commitments — if any — can you make, and how does the department close down safely today in terms of records, handover, and staff wellbeing?"
+            }
+        ];
+
+        this.maybeShowRoleSwitch();
+    }
+
+    updatePips() {
+        const total = this.scenarios.length;
+        let html = '';
+        for (let i = 0; i < total; i++) {
+            if      (i < this.step)  html += `<div class="pip done"></div>`;
+            else if (i === this.step) html += `<div class="pip active"></div>`;
+            else                      html += `<div class="pip"></div>`;
+        }
+        document.getElementById('step-pips').innerHTML = html;
+        document.getElementById('step-label').textContent =
+            this.step < this.scenarios.length
+                ? `Step ${this.step + 1} of ${this.scenarios.length}`
+                : 'Complete';
+    }
+
+    maybeShowRoleSwitch() {
+        const s = this.scenarios[this.step];
+        this.render();
+        if (s.roleSwitch) this.showRoleSwitchOverlay(s);
+    }
+
+    showRoleSwitchOverlay(s) {
+        const el = document.createElement('div');
+        el.className = 'role-switch-overlay';
+        el.id = 'role-overlay';
+        el.innerHTML = `
+            <div class="role-switch-card">
+                <div class="role-switch-eyebrow">Role Switch</div>
+                <div class="role-switch-name">${s.role}</div>
+                <div class="role-switch-desc">${s.roleSwitchDesc}</div>
+                <button class="role-switch-btn" onclick="app.dismissRoleSwitch()">Take on this role &rarr;</button>
+            </div>`;
+        document.body.appendChild(el);
+    }
+
+    dismissRoleSwitch() {
+        const el = document.getElementById('role-overlay');
+        if (el) el.remove();
+    }
+
+    render() {
+        this.updatePips();
+        const s = this.scenarios[this.step];
+        const isLast = this.step >= this.scenarios.length - 1;
+
+        /* ── LEFT PANEL ── */
+        let left = `
+            <div class="left-header">
+                <div class="role-badge">${s.role}${s.context ? ' · ' + s.context : ''}</div>
+                <div class="scenario-title">${s.title}</div>
+            </div>
+            <div class="left-body">`;
+
+        if (s.intro) left += `<p class="context-text">${s.intro}</p>`;
+
+        if (s.dialogue && s.dialogue.length) {
+            left += `<div class="dialogue">`;
+            s.dialogue.forEach(line => {
+                left += `<div>
+                    <div class="dl-speaker">${line.speaker}${line.note ? ` <span class="note">(${line.note})</span>` : ''}</div>
+                    ${line.text ? `<div class="dl-text">${line.text}</div>` : ''}
+                </div>`;
+            });
+            if (s.dialogueNote) left += `<div class="dl-note">${s.dialogueNote}</div>`;
+            left += `</div>`;
+        }
+
+        (s.alerts || []).forEach(a => {
+            left += `<div class="alert-box"><div class="box-label">&#9888; ${a.label}</div><div class="box-text">${a.text}</div></div>`;
+        });
+        (s.info || []).forEach(i => {
+            left += `<div class="info-box"><div class="box-label">${i.label}</div><div class="box-text">${i.text}</div></div>`;
+        });
+
+        left += `</div>`;
+        document.getElementById('panel-left').innerHTML = left;
+
+        /* ── RIGHT PANEL ── */
+        let right = `
+            <div class="question-eyebrow">The Decision</div>
+            <div class="question-text">${s.question}</div>
+            <div class="inputs-area">
+                <div>
+                    <div class="field-label">Group's Response <span>Summarise what the group agrees they would do</span></div>
+                    <textarea class="answer-textarea" id="answer-input"
+                        placeholder="Type the group's agreed response here…"></textarea>
+                </div>
+                <div>
+                    <div class="field-label">Facilitator Notes <span>Protocol gaps, actions, observations</span></div>
+                    <textarea class="notes-textarea" id="notes-input"
+                        placeholder="e.g. Protocol gap · Contact gap · Equipment gap · Knowledge gap"></textarea>
+                </div>
+                <button class="btn" onclick="app.advance()">
+                    ${isLast ? 'View Summary &rarr;' : 'Next Scenario &rarr;'}
+                </button>
+            </div>`;
+
+        document.getElementById('panel-right').innerHTML = right;
+    }
+
+    advance() {
+        const s       = this.scenarios[this.step];
+        const answer  = (document.getElementById('answer-input')?.value  || '').trim();
+        const notes   = (document.getElementById('notes-input')?.value   || '').trim();
+
+        this.records.push({
+            step:     this.step + 1,
+            role:     s.role,
+            title:    s.title,
+            question: s.question,
+            answer:   answer || '(no response recorded)',
+            notes:    notes
+        });
+
+        this.step++;
+        if (this.step < this.scenarios.length) {
+            this.maybeShowRoleSwitch();
+        } else {
+            this.showReview();
+        }
+    }
+
+    showReview() {
+        document.getElementById('scenario-main').classList.add('hidden');
+        document.getElementById('review-wrap').classList.remove('hidden');
+
+        document.getElementById('step-pips').innerHTML =
+            this.scenarios.map(() => `<div class="pip done"></div>`).join('');
+        document.getElementById('step-label').textContent = 'Complete';
+
+        const mins = Math.round((Date.now() - this.startTime) / 60000);
+        this._mins = mins;
+
+        /* ── REVIEW LEFT — full record ── */
+        let lh = `
+            <div class="review-heading">Session Summary</div>
+            <div class="review-sub">Full record of the group's responses and facilitator notes</div>
+            <div class="participants-box">
+                <div class="p-label">Session Details</div>
+                <div class="participants-grid">
+                    <div class="p-field">
+                        <label>Facilitator</label>
+                        <input type="text" placeholder="Name" id="p-facilitator">
+                    </div>
+                    <div class="p-field">
+                        <label>Date</label>
+                        <input type="text" id="p-date" value="${new Date().toLocaleDateString('en-GB')}">
+                    </div>
+                    <div class="p-field full">
+                        <label>Participants</label>
+                        <input type="text" placeholder="Names and roles of attendees" id="p-participants">
+                    </div>
+                </div>
+            </div>
+            <div class="review-meta" id="review-meta">
+                <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
+                <span><strong>Duration:</strong> ${mins} min</span>
+            </div>`;
+
+        this.records.forEach(r => {
+            lh += `
+            <div class="step-card">
+                <div class="step-card-header">
+                    <div class="step-card-num">Step ${r.step}</div>
+                    <div class="step-card-title">${r.title}</div>
+                    <div class="step-card-role">${r.role}</div>
+                </div>
+                <div class="step-card-body">
+                    <div class="field-question">
+                        <div class="step-field-label">Decision</div>
+                        <div class="step-field-text">${r.question}</div>
+                    </div>
+                    <div class="field-answer">
+                        <div class="step-field-label">Group's Response</div>
+                        <div class="step-field-text">${r.answer}</div>
+                    </div>
+                    ${r.notes ? `
+                    <div class="field-notes">
+                        <div class="step-field-label">Facilitator Notes</div>
+                        <div class="step-field-text">${r.notes}</div>
+                    </div>` : ''}
+                </div>
+            </div>`;
+        });
+
+        document.getElementById('review-left').innerHTML = lh;
+
+        /* ── REVIEW RIGHT — action points ── */
+        const withNotes = this.records.filter(r => r.notes && r.notes.trim());
+
+        let rh = `
+            <div class="actions-heading">Actions &amp; Follow-up</div>
+            <div class="actions-sub">
+                These are the gaps and actions flagged during the session.
+                Use them to update protocols, correct contact details, and set a date to run the scenario again once changes are in place.
+            </div>`;
+
+        if (withNotes.length > 0) {
+            withNotes.forEach(r => {
+                rh += `
+                <div class="action-card">
+                    <div class="action-card-label">Step ${r.step} · ${r.title}</div>
+                    <div class="action-card-text">${r.notes}</div>
+                </div>`;
+            });
+        } else {
+            rh += `<p class="no-actions">No facilitator notes were recorded during this session.</p>`;
+        }
+
+        rh += `
+            <div class="review-btns">
+                <button class="btn" onclick="app.printSummary()">Print Summary</button>
+                <button class="btn btn-outline" onclick="app.restart()">Run Again</button>
+            </div>`;
+
+        document.getElementById('review-right').innerHTML = rh;
+    }
+
+    printSummary() {
+        // Bake participant fields into the review-meta before printing
+        const facilitator  = document.getElementById('p-facilitator')?.value  || '—';
+        const date         = document.getElementById('p-date')?.value          || '—';
+        const participants = document.getElementById('p-participants')?.value  || '—';
+        const meta = document.getElementById('review-meta');
+        if (meta) {
+            meta.innerHTML = `
+                <span><strong>Date:</strong> ${date}</span>
+                <span><strong>Duration:</strong> ${this._mins} min</span>
+                <span><strong>Facilitator:</strong> ${facilitator}</span>
+                <span><strong>Participants:</strong> ${participants}</span>`;
+        }
+        window.print();
+    }
+
+    restart() {
+        document.getElementById('review-wrap').classList.add('hidden');
+        document.getElementById('scenario-main').classList.remove('hidden');
+        this.step      = 0;
+        this.records   = [];
+        this.startTime = Date.now();
+        this.maybeShowRoleSwitch();
+    }
+}
+
+let app;
+window.onload = () => { app = new Training(); };
+</script>
+</body>
+</html>

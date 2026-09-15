@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuclear Medicine Contingency Scenarios</title>
+  <meta name="description" content="Interactive nuclear medicine contingency training scenarios.">
+  <style>
+    :root {
+      --ink: #173226;
+      --muted: #5c6d64;
+      --surface: #ffffff;
+      --bg: #f3f6f4;
+      --accent: #3a8c68;
+      --accent-dark: #27664b;
+      --line: #d9e2dd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    .wrap {
+      width: min(960px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0 72px;
+    }
+    header {
+      max-width: 720px;
+      margin-bottom: 34px;
+    }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent-dark);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 14px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(34px, 7vw, 54px);
+      line-height: 1.05;
+      letter-spacing: -.02em;
+    }
+    .intro {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      min-height: 270px;
+      padding: 24px;
+      color: inherit;
+      text-decoration: none;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(23,50,38,.06);
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .card:hover, .card:focus-visible {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px rgba(23,50,38,.10);
+      outline: none;
+    }
+    .num {
+      display: inline-flex;
+      width: 34px;
+      height: 34px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #e5f1eb;
+      color: var(--accent-dark);
+      font-weight: 700;
+      margin-bottom: 28px;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+    .card p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .open {
+      margin-top: auto;
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+    footer {
+      margin-top: 30px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    @media (max-width: 760px) {
+      .wrap { padding-top: 34px; }
+      .grid { grid-template-columns: 1fr; }
+      .card { min-height: 0; }
+      .num { margin-bottom: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <p class="eyebrow">Interactive training</p>
+      <h1>Nuclear Medicine Contingency Scenarios</h1>
+      <p class="intro">Choose a scenario below. Each opens as an interactive facilitated training exercise in your browser.</p>
+    </header>
+
+    <section class="grid" aria-label="Available scenarios">
+      <a class="card" href="transport.html">
+        <span class="num">1</span>
+        <h2>Transport Emergency</h2>
+        <p>Nuclear medicine transport emergency facilitated training scenario.</p>
+        <span class="open">Open scenario →</span>
+      </a>
+
+      <a class="card" href="cyber.html">
+        <span class="num">2</span>
+        <h2>Cyber Incident</h2>
+        <p>Nuclear medicine cyber incident facilitated training scenario.</p>
+        <span class="open">Open scenario →</span>
+      </a>
+
+      <a class="card" href="i131.html">
+        <span class="num">3</span>
+        <h2>I-131 Emergency Transfer</h2>
+        <p>Multi-disciplinary radiation emergency response training scenario.</p>
+        <span class="open">Open scenario →</span>
+      </a>
+    </section>
+
+    <footer>
+      Educational contingency training material. For conference use, publish only content you are comfortable making publicly accessible.
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I-131 Patient Emergency Transfer - Training Scenario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Medical/Clinical Theme */
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --text: #1a2332;
+      --text-muted: #5a6778;
+      --accent: #1e5a8a;
+      --accent-hover: #164569;
+      --accent-light: #e8f1f8;
+      --border: #dce3eb;
+      --warning: #b45309;
+      --warning-light: #fef3e2;
+      --info: var(--accent);
+      --info-light: var(--accent-light);
+      --font-heading: 'Source Serif 4', Georgia, serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-body); background: var(--bg); min-height: 100vh; color: var(--text); line-height: 1.6; }
+    .container { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+    .header { text-align: center; margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .header h1 { font-family: var(--font-heading); font-size: 28px; font-weight: 600; color: var(--text); margin-bottom: 8px; letter-spacing: -0.5px; }
+    .header p { color: var(--text-muted); font-size: 14px; }
+    .progress-container { margin-bottom: 32px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .progress-bar { background: var(--border); height: 3px; border-radius: 2px; overflow: hidden; }
+    .progress-fill { background: var(--accent); height: 100%; transition: width 0.4s ease; }
+    .role-badge { display: inline-block; background: var(--accent); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; margin-bottom: 24px; }
+    .role-switch { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; font-weight: 500; text-align: center; }
+    .scenario-card { background: var(--surface); border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+    .scenario-title { font-family: var(--font-heading); font-size: 22px; font-weight: 600; margin-bottom: 24px; color: var(--text); }
+    .context-block { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .dialogue { background: var(--bg); border-radius: 8px; padding: 20px 24px; margin: 20px 0; font-size: 15px; }
+    .dialogue-line { margin-bottom: 16px; }
+    .dialogue-line:last-child { margin-bottom: 0; }
+    .dialogue-speaker { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .dialogue-text { color: var(--text); }
+    .dialogue-note { font-style: italic; color: var(--text-muted); margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); font-size: 14px; }
+    .alert-box { background: var(--warning-light); border-left: 3px solid var(--warning); padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0; font-size: 14px; }
+    .alert-box strong { display: block; color: var(--warning); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .info-box { background: var(--info-light); border-left: 3px solid var(--info); padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0; font-size: 14px; }
+    .info-box strong { display: block; color: var(--info); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .question-section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+    .question-text { font-family: var(--font-heading); font-size: 18px; font-weight: 600; margin-bottom: 20px; color: var(--text); }
+    .options-list { display: flex; flex-direction: column; gap: 12px; }
+    .option { background: var(--bg); border: 2px solid transparent; padding: 16px 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; font-size: 14px; line-height: 1.5; }
+    .option:hover { background: var(--accent-light); border-color: var(--accent); }
+    .option.selected { background: var(--accent-light); border-color: var(--accent); }
+    .option-label { font-weight: 600; color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .btn { background: var(--accent); color: white; border: none; padding: 14px 28px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; margin-top: 24px; transition: all 0.2s ease; font-family: inherit; }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .feedback-inline { background: var(--accent-light); border-radius: 8px; padding: 20px; margin-top: 20px; animation: fadeIn 0.3s ease; }
+    .feedback-inline strong { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .review-section { background: var(--surface); border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+    .review-title { font-family: var(--font-heading); font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+    .review-subtitle { color: var(--text-muted); margin-bottom: 32px; font-size: 14px; }
+    .review-meta { display: flex; gap: 24px; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 32px; font-size: 14px; color: var(--text-muted); }
+    .decision-card { background: var(--bg); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .decision-card h4 { font-size: 14px; color: var(--accent); margin-bottom: 4px; }
+    .decision-card h3 { font-family: var(--font-heading); font-size: 16px; margin-bottom: 12px; }
+    .decision-detail { font-size: 14px; margin-bottom: 8px; }
+    .decision-detail strong { color: var(--text-muted); font-weight: 500; }
+    .discussion-section { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .discussion-section h3 { font-family: var(--font-heading); font-size: 18px; margin-bottom: 20px; }
+    .discussion-topic { margin-bottom: 24px; }
+    .discussion-topic h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .discussion-topic ul { list-style: none; font-size: 14px; color: var(--text-muted); }
+    .discussion-topic li { margin-bottom: 6px; padding-left: 16px; position: relative; }
+    .discussion-topic li::before { content: "–"; position: absolute; left: 0; color: var(--accent); }
+    .button-group { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+    .hidden { display: none; }
+    @media print { body { background: white; } .container { max-width: 100%; } .btn, .button-group { display: none; } }
+    @media (max-width: 600px) { .container { padding: 24px 16px 60px; } .scenario-card, .review-section { padding: 24px 20px; } .review-meta { flex-direction: column; gap: 8px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>I-131 Patient Emergency Transfer</h1>
+      <p>Multi-Disciplinary Radiation Emergency Response Scenario</p>
+    </header>
+
+    <div id="scenario-content"></div>
+    <div id="review-section" class="review-section hidden"></div>
+  </div>
+
+  <script>
+    const SCENARIO_CONFIG = {
+      title: "I-131 Patient Emergency Transfer",
+      subtitle: "Multi-Disciplinary Radiation Emergency Response Scenario",
+
+      scenarios: [
+        {
+          id: 1,
+          role: "Oncology Nurse",
+          context: "Isolation Ward, 02:35 AM",
+          title: "The Night Call",
+          intro: "You're Gemma, an oncology nurse on the night shift covering the radioiodine isolation ward. Mrs. Adaeze Nwosu, 54, received 3.0 GBq I-131 yesterday afternoon for thyroid remnant ablation following total thyroidectomy. She's been stable and compliant with isolation protocols.",
+          dialogue: [
+            { speaker: "Patient Call Bell", text: "Rings repeatedly" },
+            { speaker: "You enter the room", text: "You remember from your training to keep some distance initially, though you're a bit hazy on the exact details—it was at least eighteen months ago." },
+            { speaker: "Mrs. Nwosu", text: '"I can\'t breathe properly... my chest feels tight... it started maybe twenty minutes ago but it\'s getting worse..."', note: "visibly distressed, slightly diaphoretic" },
+            { speaker: "You", text: '"Can you describe the pain? Does it go anywhere else?"' },
+            { speaker: "Mrs. Nwosu", text: '"It\'s more like pressure... and my left calf has been sore since yesterday but I thought it was just from lying in bed..."' }
+          ],
+          dialogueNote: "Your clinical assessment: elevated respiratory rate (24/min), HR 110, SpO2 93% on room air. The combination of symptoms—chest tightness, dyspnoea, and calf pain post-surgery with bed rest—raises immediate concern for pulmonary embolism.",
+          alerts: [
+            { label: "Clinical Priority", text: "Suspected PE requires urgent assessment—CTPA imaging and anticoagulation consideration. This cannot wait until morning." },
+            { label: "Knowledge Gap", text: "Your radioiodine training was 18 months ago. You remember the basics—distance, time, body fluids—but the specific procedures for emergencies are fuzzy. The Clinical Nurse Specialist and Medical Physicist work 9-5 only." }
+          ],
+          info: [
+            { label: "What You Remember", text: "There's a grab pack somewhere in the ward office with monitoring equipment and an SOP. You think there's an emergency contact number for a radiation expert, but you're not sure where it's written down." }
+          ],
+          question: "What is your immediate priority while managing both the clinical emergency and your uncertainty about radiation procedures?",
+          options: [
+            { text: "Call 2222 (cardiac arrest team) immediately—clinical emergency takes absolute priority and they'll know what to do", feedback: "The crash team response may be appropriate if the patient deteriorates, but currently she's conscious and talking. This may bring multiple unprepared staff into a controlled area, and they won't know the radiation procedures either." },
+            { text: "Administer oxygen, call the on-call medical registrar, and while waiting, find the grab pack and SOP from the ward office", feedback: "Balances immediate clinical intervention with gathering the information you need. Oxygen addresses hypoxia while you prepare to brief whoever arrives." },
+            { text: "Search through the ward documentation to find the emergency radiation contact number before doing anything else", feedback: "Finding expert advice is important, but delaying clinical intervention for a documentation search could be dangerous. The patient needs oxygen now." },
+            { text: "Move the patient closer to the nurses' station where you can monitor her more easily and get help faster", feedback: "Moving an I-131 patient through the ward without preparation creates uncontrolled contamination risk and exposes other areas unnecessarily." }
+          ]
+        },
+        {
+          id: 2,
+          role: "Oncology Nurse",
+          title: "Finding the Resources",
+          intro: "You've put Mrs. Nwosu on oxygen and called the on-call medical registrar, Dr. Kwame Asante. He's on his way but will be 10 minutes. You're in the ward office looking for the grab pack.",
+          dialogue: [
+            { speaker: "You (searching)", text: "The grab pack isn't where you expected it. After checking three cupboards, you find it on a high shelf behind some old training folders." },
+            { speaker: "Inside the grab pack", text: "Electronic Personal Dosimeter (EPD), contamination monitor (you're not entirely sure how to use it), controlled area signage, gloves, aprons, personal dose record sheets, and a laminated SOP." },
+            { speaker: "You scan the SOP", text: "It's four pages long. On page 3, in a section titled 'Out of Hours Emergencies', you find: 'Contact the Emergency Radiation Protection Adviser on 07700 900XXX'" }
+          ],
+          dialogueNote: "You've found the number. But you also need to brief Dr. Asante when he arrives, and you're conscious that Mrs. Nwosu is alone in her room.",
+          alerts: [
+            { label: "Time Pressure", text: "Dr. Asante will arrive in about 8 minutes. Do you call the RPA number now, or wait until you know more about what's happening clinically?" },
+            { label: "Competing Demands", text: "You can't be in three places at once—with the patient, briefing the doctor, and on the phone to the RPA." }
+          ],
+          info: [
+            { label: "SOP Key Points (Quick Scan)", text: "Maintain distance when not providing direct care. Gloves for any contact. Body fluids (especially urine, saliva, vomit) are contaminated. In emergencies, clinical care takes priority—radiation precautions should not delay life-saving treatment." }
+          ],
+          question: "How do you manage the next few minutes before Dr. Asante arrives?",
+          options: [
+            { text: "Call the emergency RPA number immediately—they need maximum notice and can advise you while you wait for the doctor", feedback: "Gets expert advice early in the process. The RPA can start preparing and guide you on briefing the medical team. Good use of available time." },
+            { text: "Return to Mrs. Nwosu with the grab pack, keep her company, and wait to call the RPA until after Dr. Asante has assessed her", feedback: "Prioritises patient contact but delays radiation expertise. You might have useful clinical information for the RPA after assessment, but they'll have less time to prepare." },
+            { text: "Quickly read the full SOP so you understand the procedures properly, then brief Dr. Asante when he arrives", feedback: "Four pages is too much to absorb properly under time pressure. You've got the key points—focus on action rather than perfect knowledge." },
+            { text: "Ask the ward clerk to call the RPA number while you return to the patient, so both things happen simultaneously", feedback: "Good delegation if a ward clerk is available at 2:45 AM. However, the RPA will have technical questions the clerk can't answer—this may create confusion." }
+          ]
+        },
+        {
+          id: 3,
+          role: "Oncology Nurse",
+          title: "Briefing the Medical Team",
+          intro: "Dr. Asante arrives at the ward. You meet him at the entrance with the grab pack and SOP.",
+          dialogue: [
+            { speaker: "Dr. Asante", text: '"Gemma, what have we got?"', note: "moving quickly toward the room" },
+            { speaker: "You", text: '"Dr. Asante, before you go in—Mrs. Nwosu is a radioiodine patient. She had I-131 yesterday. There are precautions..."' },
+            { speaker: "Dr. Asante", text: '"Right, okay. I\'ve never actually dealt with one of these patients before. What do I need to know? Is it safe to examine her?"', note: "hesitant but clearly concerned about the clinical picture you've described" }
+          ],
+          dialogueNote: "Dr. Asante is looking to you for guidance on the radiation aspects, even though your own training is rusty. He needs to assess this patient now.",
+          alerts: [
+            { label: "Role Reversal", text: "You're more familiar with this ward than the doctor, even if your knowledge isn't complete. He's relying on you to guide him on radiation safety." },
+            { label: "Honest Uncertainty", text: "You're not an expert. How do you give him enough information to proceed safely without overstating your own confidence?" }
+          ],
+          info: [
+            { label: "What You Can Offer", text: "The EPD from the grab pack (for dose monitoring), gloves, and the basic principles from the SOP: distance when possible, gloves for contact, avoid body fluids." }
+          ],
+          question: "How do you brief Dr. Asante quickly and honestly given your own limited expertise?",
+          options: [
+            { text: "Give him the full SOP and say you're not really trained in this—he should read it before going in", feedback: "Honest about your limitations but creates delay and passes all responsibility to someone who knows even less. The SOP is too long for a quick read in an emergency." },
+            { text: "Hand him the EPD and gloves, share what you know: 'Gloves for contact, keep distance when you can, the main risk is body fluids. I've called the emergency radiation number for expert backup.'", feedback: "Gives practical, actionable guidance while being honest about the limits. Positions expert help as coming. Enables him to proceed with reasonable precautions." },
+            { text: "Tell him confidently that it's completely safe as long as he wears gloves—you don't want him to be nervous about treating the patient", feedback: "Overstates your certainty and may lead to complacency. If something goes wrong, you've given false assurance. Better to be honest about what you know and don't know." },
+            { text: "Suggest he waits until the radiation expert calls back before entering the room", feedback: "The patient is hypoxic and potentially has a PE. Waiting for a callback before clinical assessment could be dangerous. Radiation precautions shouldn't delay urgent care." }
+          ]
+        },
+        {
+          id: 4,
+          role: "Emergency RPA (Medical Physicist)",
+          roleSwitch: true,
+          title: "The 3 AM Phone Call",
+          intro: "You're Dr. Eleanor Vance, a medical physicist on the regional emergency RPA rota. Your phone wakes you at 2:52 AM.",
+          dialogue: [
+            { speaker: "Caller (Gemma)", text: '"Hello, is this the emergency radiation adviser? I\'m calling from St. Michael\'s oncology ward. We have an I-131 patient who\'s become unwell—they think it might be a PE. She might need to be transferred to A&E at the Royal, and I wasn\'t sure what we need to do about the radiation..."', note: "sounds nervous but organised" },
+            { speaker: "You", text: '"Okay, I\'m awake. Tell me about the patient—when was she administered, what activity, and what\'s happening now clinically?"' },
+            { speaker: "Gemma", text: '"She had 3 GBq of I-131 yesterday afternoon, about fourteen hours ago. She\'s got chest pain and low oxygen. The medical reg is examining her now. They\'re talking about transferring her to the Royal for a scan."' }
+          ],
+          dialogueNote: "You're 35 minutes away from St. Michael's and probably 45 minutes from the Royal. You don't have direct contact numbers for the Royal's A&E or radiology departments—you'd normally go through switchboard.",
+          alerts: [
+            { label: "Information Gaps", text: "You need to support a transfer between two hospitals you're not directly affiliated with. You don't know who's receiving at the Royal or whether they've been informed." },
+            { label: "Remote Support", text: "You can't be on scene quickly. Your value right now is guidance and coordination, but you're piecing together the situation from one phone call." }
+          ],
+          info: [
+            { label: "Your Resources", text: "You have a grab bag at home with monitoring equipment. You know the general principles. You don't have the specific SOP for St. Michael's or contact details for the Royal's on-call teams." }
+          ],
+          question: "How do you provide effective remote support while trying to understand what's happening?",
+          options: [
+            { text: "Tell Gemma to hold while you get dressed and head to St. Michael's—you'll call her back from the car", feedback: "Gets you moving but leaves them without guidance during the critical early decisions. You can talk while preparing to travel." },
+            { text: "Stay on the line, get as much information as you can, give immediate guidance on precautions, and ask Gemma to find out where the patient is being transferred and who the receiving team is", feedback: "Maximises information flow in both directions. You can guide immediate actions while building the picture of where you need to direct your support." },
+            { text: "Give Gemma the key radiation advice quickly (dose rate context, basic precautions) and tell her to have someone from the Royal call you directly", feedback: "Provides immediate guidance and tries to establish contact with the receiving hospital. Risk is that the message doesn't get through clearly and no one calls." },
+            { text: "Tell Gemma that clinical care comes first and they should proceed with the transfer—you'll catch up with the paperwork in the morning", feedback: "Correct that clinical care takes priority, but dismissive of legitimate radiation protection needs. Staff and the receiving hospital need guidance, not just permission." }
+          ]
+        },
+        {
+          id: 5,
+          role: "On-Call Medical Registrar",
+          roleSwitch: true,
+          title: "Clinical Assessment and Transfer Decision",
+          intro: "You're Dr. Kwame Asante. You've assessed Mrs. Nwosu wearing the dosimeter and gloves Gemma provided. Your findings confirm your concern.",
+          dialogue: [
+            { speaker: "Your assessment", text: "BP 145/90, HR 112, RR 26, SpO2 91% on 4L O2. ECG shows sinus tachycardia with S1Q3T3 pattern. Left calf tender with mild swelling. Wells score indicates PE likely." },
+            { speaker: "You (to Mrs. Nwosu)", text: '"I think you may have a blood clot that\'s travelled to your lungs. We need to get you to the Royal for a scan to confirm this and start treatment."' },
+            { speaker: "Mrs. Nwosu", text: '"But they told me I couldn\'t leave this room for two days... won\'t I make everyone sick?"', note: "anxious and short of breath" },
+            { speaker: "Gemma (returning)", text: '"I\'ve got the radiation physicist on the phone. She wants to know where the patient is going and who\'s receiving her. She says she can give you guidance on the transfer."' }
+          ],
+          dialogueNote: "You need to arrange an ambulance transfer to the Royal's A&E (15 minutes away) for an urgent CTPA. The physicist is available by phone but isn't local.",
+          alerts: [
+            { label: "Transfer Coordination", text: "The ambulance service will need to know about the radioactive patient. The Royal's A&E needs to be prepared. Someone needs to coordinate all of this." },
+            { label: "Multiple Communication Channels", text: "You need to: request an ambulance, inform A&E at the Royal, relay information to the physicist, and keep the patient informed. Who does what?" }
+          ],
+          info: [
+            { label: "Physicist Guidance (via Gemma)", text: "Dr. Vance says: 'The dose rate will be roughly 40 microsieverts per hour at a metre—for context, a chest X-ray is about 20 microsieverts. Gloves for contact, warn the ambulance crew, and I'll call the Royal to brief whoever's receiving. Can you get me the name of the A&E reg?'" }
+          ],
+          question: "How do you coordinate the transfer while managing the various communication needs?",
+          options: [
+            { text: "Call the ambulance yourself and tell them it's an urgent transfer with a 'radioactive patient'—they can figure out the precautions", feedback: "Initiates transfer but vague description won't help the ambulance crew prepare. 'Radioactive patient' without context may cause alarm or delay." },
+            { text: "Ask Gemma to keep the physicist on the line and pass the phone to you, so you can coordinate directly while she arranges the ambulance", feedback: "Gets you direct access to expert guidance, but takes Gemma off coordinating tasks. Someone still needs to call the ambulance and the Royal." },
+            { text: "Divide tasks: you'll call the ambulance and the Royal's A&E; Gemma stays with the patient; pass your name and the A&E reg's name to the physicist so she can call them directly", feedback: "Clear division of responsibilities. Enables the physicist to brief the receiving team directly with accurate information. Everyone has a defined role." },
+            { text: "Focus on the patient—start empirical anticoagulation now and let Gemma handle all the phone coordination", feedback: "Empirical treatment may be appropriate but doesn't address the transfer coordination. Gemma is doing her best but isn't senior enough to coordinate between hospitals." }
+          ]
+        },
+        {
+          id: 6,
+          role: "Ambulance Paramedic",
+          roleSwitch: true,
+          title: "The Transfer Call",
+          intro: "You're Marcus, crewing a night ambulance with your colleague Priya. You receive a call for an urgent transfer. Control has flagged it as involving 'radioactive material—iodine treatment.'",
+          dialogue: [
+            { speaker: "Priya", text: '"Radioactive? What does that actually mean for us? Are we supposed to wear hazmat suits or something?"', note: "concerned" },
+            { speaker: "Control", text: '"Patient is a 54-year-old female, suspected PE, conscious and talking but hypoxic. She received radioiodine treatment yesterday for cancer. The ward will brief you on arrival."' },
+            { speaker: "Priya", text: '"I don\'t remember ever covering this in training. Are we going to be contaminated? What about the ambulance afterwards?"' }
+          ],
+          dialogueNote: "You arrive at St. Michael's. Gemma meets you at the isolation ward entrance. She looks tired but prepared, with gloves and paperwork ready.",
+          alerts: [
+            { label: "Crew Anxiety", text: "Priya is visibly nervous. Her anxiety could affect patient care and her willingness to assist with direct care." },
+            { label: "Unknown Territory", text: "Neither of you have specific training for this. You're relying on the ward staff to tell what's safe." }
+          ],
+          info: [
+            { label: "Gemma's Briefing", text: "She explains: 'The patient's giving off some radiation but it's low level—less than a chest X-ray for the time you'll be with her. The main thing is body fluids—her urine and vomit would be contaminated, so gloves for any contact. She's had anti-sickness medication and we've put a pad down just in case. The journey's about 15 minutes. Dr. Vance, the radiation physicist, has called ahead to the Royal so they're expecting you.'" }
+          ],
+          question: "How do you manage Priya's concerns while preparing for safe patient transfer?",
+          options: [
+            { text: "Tell Priya the radiation is nothing to worry about and she's overreacting—we need to get moving", feedback: "Dismissive approach doesn't build understanding or trust. Priya may remain distracted and anxious throughout the transfer, affecting her ability to assist." },
+            { text: "Acknowledge her concern, share what Gemma said (chest X-ray comparison, gloves for fluids), and focus on practical actions: 'Gloves on, normal care, 15-minute job.'", feedback: "Validates concerns while providing reassuring context and clear actions. Calm leadership helps the team function effectively under uncertainty." },
+            { text: "Suggest Priya drives while you attend to the patient alone in the back, minimising her exposure", feedback: "Reduces Priya's anxiety and exposure but leaves you without assistance if the patient deteriorates. May reinforce her fear rather than build competence for future incidents." },
+            { text: "Ask Gemma to write down all the precautions so you have documentation of what you were told", feedback: "Documentation has value but this isn't the moment for paperwork. The patient needs transferring, and verbal briefing is sufficient for the immediate task." }
+          ]
+        },
+        {
+          id: 7,
+          role: "Ambulance Paramedic",
+          title: "Transfer Incident",
+          intro: "You're 8 minutes into the transfer. Mrs. Nwosu has been stable, on oxygen, and even managed a weak smile when you reassured her. Then things change.",
+          dialogue: [
+            { speaker: "Mrs. Nwosu", text: '"I feel sick... I\'m going to be—"', note: "retches" },
+            { speaker: "Event", text: "She vomits approximately 200ml onto the stretcher and ambulance floor. Some splashes onto your boots." },
+            { speaker: "Priya (through the partition)", text: '"Oh God, is that radioactive? Marcus, are you okay? What do we do?"', note: "alarmed" },
+            { speaker: "Mrs. Nwosu", text: '"I\'m so sorry... I\'m so sorry..."', note: "distressed and apologising repeatedly" }
+          ],
+          dialogueNote: "The patient is conscious but upset. Priya is panicking. You need to manage Mrs. Nwosu clinically, reassure her emotionally, deal with the contamination reality, calm Priya, and complete the transfer.",
+          alerts: [
+            { label: "Contamination Event", text: "Vomit from an I-131 patient contains radioactive iodine. This is now a contamination situation as well as a clinical one." },
+            { label: "Clinical Priority", text: "Vomiting in a hypoxic patient increases aspiration risk. Her oxygen saturations need monitoring. The clinical situation hasn't changed—she still needs that CT scan." }
+          ],
+          info: [
+            { label: "Reality Check", text: "The contamination is real but not an emergency. Your boots can be dealt with later. The ambulance will need cleaning and checking. Priority remains getting this patient to definitive care." }
+          ],
+          question: "How do you manage this multi-faceted situation during the transfer?",
+          options: [
+            { text: "Tell Priya to stop the ambulance immediately so you can clean up properly before continuing", feedback: "Delays a time-critical transfer for a contamination issue that can be addressed after arrival. Stopping doesn't change anything clinically or radiologically." },
+            { text: "Focus on Mrs. Nwosu—position her safely, reassure her it's okay, monitor her sats—and calmly tell Priya to keep driving; you'll sort the contamination at the Royal", feedback: "Maintains clinical focus, provides emotional support to the patient, and doesn't escalate Priya's anxiety. Appropriate prioritisation for the situation." },
+            { text: "Radio ahead to warn the Royal about the contamination so they can set up decontamination", feedback: "Reasonable to inform them, but they're already expecting a radioactive patient. Extensive decontamination setup isn't needed for low-level I-131—basic cleaning measures suffice." },
+            { text: "Ask Priya to pull over so you can swap positions—she should manage the patient while you drive, since you're now contaminated", feedback: "Creates delay and involves your anxious colleague directly with a patient she's nervous about. Your boots being contaminated doesn't prevent you from continuing care." }
+          ]
+        },
+        {
+          id: 8,
+          role: "A&E Registrar",
+          roleSwitch: true,
+          title: "Receiving the Patient",
+          intro: "You're Dr. Hannah Oyelaran, A&E registrar at the Royal on night shift. The coordinator tells you: 'Incoming patient, radioactive, suspected PE, 5 minutes out. Someone called Dr. Vance has been on the phone—she left a message with the nursing coordinator and said she's driving in but won't be here for another 20 minutes.'",
+          dialogue: [
+            { speaker: "You (to coordinator)", text: '"What was the message from this Dr. Vance?"' },
+            { speaker: "Coordinator (reading notes)", text: '"Patient received 3 GBq I-131 fourteen hours ago. Dose rate about 40 microsieverts per hour at one metre. Body fluids contaminated—patient has vomited in transit. Needs side room. Staff should wear gloves for all contact. Proceed with all necessary investigations. She\'ll call back in 10 minutes or come straight here."' },
+            { speaker: "Senior Staff Nurse", text: '"I\'m not putting my nurses in that room without proper radiation training. We don\'t do nuclear medicine here—we\'re not set up for this."', note: "arms crossed" }
+          ],
+          dialogueNote: "The ambulance is pulling up. You have a message from an expert you've never met, a staff nurse refusing to cooperate, and a potentially critically unwell patient arriving imminently.",
+          alerts: [
+            { label: "Staff Resistance", text: "The senior staff nurse's concern is influencing other staff. You can see nervous glances being exchanged. Someone needs to take charge." },
+            { label: "Department Pressure", text: "It's a busy night. Two other patients are waiting for your review. Every minute you spend on this situation is time away from them." }
+          ],
+          info: [
+            { label: "Physicist's Guidance Summary", text: "Gloves for contact. Side room. Body fluids contaminated. Proceed with CT and other investigations normally. Dr. Vance is 20 minutes away." }
+          ],
+          question: "How do you manage staff concerns while preparing to receive a sick patient?",
+          options: [
+            { text: "Tell the staff nurse this is a clinical emergency and her nurses will do their jobs or face disciplinary action", feedback: "May force compliance but destroys trust and creates a hostile working environment. Anxious, resentful staff don't provide good care." },
+            { text: "Gather the team for 60 seconds: 'I've had expert guidance. It's gloves for contact, side room, proceed with normal care. Less radiation than an X-ray. I need two volunteers to help me receive this patient—who's in?'", feedback: "Provides reassurance backed by expert advice, acknowledges the unusual situation, and requests rather than demands help. Often identifies willing volunteers and reframes the situation positively." },
+            { text: "Assign only yourself to receive the patient and provide initial care until Dr. Vance arrives, avoiding conflict with the staff nurse", feedback: "Avoids confrontation but leaves you managing a sick patient alone without nursing support. Not sustainable and potentially unsafe." },
+            { text: "Tell the coordinator to divert the ambulance to another hospital that has nuclear medicine facilities", feedback: "This patient needs urgent PE management, not nuclear medicine expertise. Diversion would delay care for a time-critical condition. Any acute hospital can manage this with basic precautions." }
+          ]
+        },
+        {
+          id: 9,
+          role: "A&E Staff Nurse",
+          roleSwitch: true,
+          title: "Direct Patient Care",
+          intro: "You're Tola, one of the A&E nurses. You volunteered when Dr. Oyelaran asked for help—partly because you could see no one else was going to, and partly because you're curious. Mrs. Nwosu is now in the side room, on oxygen, and Dr. Oyelaran has ordered an urgent CTPA. You need to insert a cannula for contrast.",
+          dialogue: [
+            { speaker: "Mrs. Nwosu", text: '"I\'m so sorry for all this trouble... everyone seems frightened of me..."', note: "tearful, exhausted" },
+            { speaker: "You", text: '"You haven\'t caused any trouble, lovey. You\'re unwell and we\'re here to look after you. I just need to pop a little needle in your arm for the scan."' },
+            { speaker: "Mrs. Nwosu", text: '"Is it really safe for you? I couldn\'t bear it if someone got hurt because of me. The nurse at the other hospital looked so scared when she came in my room..."' }
+          ],
+          dialogueNote: "Mrs. Nwosu has been through a frightening night. She's worried about the PE, but she seems almost more distressed about being perceived as dangerous. Through the window, you can see colleagues watching how you're managing.",
+          alerts: [
+            { label: "Patient Psychological State", text: "Her distress about 'being radioactive' is compounding her medical anxiety. She needs to feel like a patient, not a hazard." },
+            { label: "Observation", text: "How you handle this is being watched. Your calm, normal nursing care could set the tone for how other staff approach this patient." }
+          ],
+          info: [
+            { label: "Current Status", text: "Dr. Vance has arrived and is in the corridor talking to Dr. Oyelaran. CT is ready. Blood is not significantly contaminated—it's urine and saliva that concentrate the I-131." }
+          ],
+          question: "How do you balance reassuring Mrs. Nwosu with appropriate radiation awareness?",
+          options: [
+            { text: "Focus on clinical efficiency—cannula in, bloods done, get her to CT quickly, minimise time in the room", feedback: "Efficient but may reinforce her feeling that she's something to be processed quickly and escaped from. She's had a terrible night and deserves compassionate presence." },
+            { text: "Reassure her warmly and honestly: 'The precautions are simple and I'm fine being here with you. My biggest worry right now is getting this scan done so we can treat you properly. Sharp scratch coming...'", feedback: "Combines genuine reassurance with normal nursing rapport. Demonstrates to watching colleagues that standard care is appropriate. Addresses her emotional needs alongside clinical needs." },
+            { text: "Explain the radiation science in detail so she understands exactly why it's safe", feedback: "Well-intentioned but she's exhausted and frightened—a technical explanation may overwhelm her. She needs emotional reassurance, not a physics lesson." },
+            { text: "Tell her not to worry about the staff and focus on herself—we're trained professionals and we know what we're doing", feedback: "Slightly dismissive of her valid concern for others. Also not entirely true—most staff here aren't specifically trained for this. Honest, warm reassurance works better than professional distance." }
+          ]
+        },
+        {
+          id: 10,
+          role: "Emergency RPA (Medical Physicist)",
+          roleSwitch: true,
+          title: "Scene Management and Coordination",
+          intro: "You're Dr. Vance. You've arrived at the Royal after a 45-minute drive. The patient is in CT. Dr. Oyelaran has briefed you on the clinical situation. Now the ambulance crew is waiting in the corridor—their vehicle has contamination from the vomiting incident.",
+          dialogue: [
+            { speaker: "Marcus (paramedic)", text: '"She was sick in the back of the ambulance. It\'s on the floor, the stretcher, my boots... Are we contaminated? Do we need to do something before we can take another job? It\'s already been a busy night."' },
+            { speaker: "You check his boots with your contamination monitor", text: "There's a slight reading—definitely above background, but not dramatically so." },
+            { speaker: "Priya (other paramedic)", text: '"Is that bad? Should we go to Occupational Health? What about the ambulance—is it safe to use?"', note: "anxious" }
+          ],
+          dialogueNote: "The contamination is real but low-level. You need to manage this appropriately without causing panic or unnecessarily taking an ambulance out of service on a busy night, while still following proper procedures.",
+          alerts: [
+            { label: "Resource Impact", text: "Every ambulance matters tonight. But proper contamination management is also important—both for safety and for maintaining trust in how these situations are handled." },
+            { label: "Documentation", text: "This will need logging. The ambulance service will want some kind of report. Personal dose records for the crew should be completed." }
+          ],
+          info: [
+            { label: "Monitoring Findings", text: "Boots: low-level contamination, easily cleaned. Stretcher: contamination present, needs wipe-down. Floor: localised contamination. Personal dosimetry shows no readings above action levels." }
+          ],
+          question: "How do you manage the ambulance contamination and crew concerns?",
+          options: [
+            { text: "Take the ambulance out of service for full professional decontamination—you can't take risks with contamination", feedback: "Very conservative approach. Proportionate? The contamination is low-level I-131 that can be cleaned with detergent. Taking a vehicle off the road has real operational impact." },
+            { text: "Provide shoe covers for Marcus, supervise a wipe-down of the stretcher and floor with detergent, recheck with the monitor—if clear, they can return to service after you've documented the incident", feedback: "Proportionate response that addresses the contamination practically, provides reassurance through monitoring, and maintains ambulance availability while following proper procedures." },
+            { text: "Tell them the contamination is trivial and will decay away—just carry on and don't worry about it", feedback: "Dismissive and doesn't follow proper procedures. Even if the risk is low, contamination should be documented and addressed. This undermines confidence in radiation protection advice." },
+            { text: "Tell them to contact their own service's radiation protection officer and follow whatever procedures their service has", feedback: "Passes responsibility when you have the expertise and equipment to help right now. Their service may not have specific procedures, and the crew need guidance immediately, not a referral." }
+          ]
+        },
+        {
+          id: 11,
+          role: "Emergency RPA (Medical Physicist)",
+          title: "Admission Planning",
+          intro: "The CTPA confirms bilateral pulmonary emboli. Mrs. Nwosu is on anticoagulation and stable. She needs admission. Dr. Oyelaran approaches you with a problem.",
+          dialogue: [
+            { speaker: "Dr. Oyelaran", text: '"Good news is she\'s stable and the treatment\'s started. Bad news is the medical admissions unit is refusing to take her. The coordinator says they \'don\'t have facilities for radioactive patients\' and want her sent back to St. Michael\'s."' },
+            { speaker: "You", text: '"The radiation precautions are the same wherever she goes—side room, gloves, manage body fluids. What\'s their actual concern?"' },
+            { speaker: "Dr. Oyelaran", text: '"I think they\'re just scared. But honestly, sending her back to St. Michael\'s would solve a lot of problems. They know how to manage the radiation side. Can we do that?"' }
+          ],
+          dialogueNote: "St. Michael's has an isolation ward but isn't set up for acute PE monitoring. The Royal has acute medicine but is anxious about radiation. Mrs. Nwosu has already had one ambulance transfer tonight.",
+          alerts: [
+            { label: "Clinical vs. Convenience", text: "The path of least resistance (transfer back) isn't the best clinical option. But forcing MAU to accept a patient they're frightened of has its own risks." },
+            { label: "Patient Perspective", text: "Mrs. Nwosu is exhausted and on anticoagulation. Another transfer carries risk and distress. She's already apologised repeatedly for 'being a burden.'" }
+          ],
+          info: [
+            { label: "Radiation Timeline", text: "Current dose rate: ~35 µSv/hr at 1m. In 24 hours: ~20 µSv/hr. By day 3: <10 µSv/hr. Contamination risk decreases as I-131 is excreted. By tomorrow evening, precautions can likely be significantly relaxed." }
+          ],
+          question: "How do you advise on the admission decision?",
+          options: [
+            { text: "Recommend transfer back to St. Michael's—they have the isolation facilities and experience with these patients", feedback: "Solves the radiation anxiety but puts a PE patient somewhere not designed for acute medical monitoring. If she deteriorates, escalation involves yet another transfer to a different hospital." },
+            { text: "Support MAU admission: offer to go to the ward, brief the staff directly, provide written guidance, and leave your mobile number. Make yourself part of the solution.", feedback: "Addresses the staff anxiety directly by providing expert support and ongoing availability. Keeps the patient in the appropriate clinical environment for her acute condition." },
+            { text: "Tell Dr. Oyelaran this is a clinical decision and radiation shouldn't be driving it—MAU needs to accept her like any other patient", feedback: "Correct principle but unhelpfully blunt. MAU's concerns, while excessive, need addressing with reassurance and support, not dismissal." },
+            { text: "Suggest Mrs. Nwosu stays in A&E until morning when the day team can sort out where she goes", feedback: "Delays appropriate admission, occupies an A&E bed on a busy night, and leaves the decision for someone else. The patient deserves resolution now." }
+          ]
+        },
+        {
+          id: 12,
+          role: "Oncology Nurse",
+          roleSwitch: true,
+          title: "Morning Handover and Reflection",
+          intro: "It's 8:30 AM. You're Gemma, back at St. Michael's, about to hand over to the day team. Your manager has asked for a verbal summary. You've been awake for nearly 12 hours.",
+          dialogue: [
+            { speaker: "Ward Manager", text: '"I understand there was quite an incident overnight. Mrs. Nwosu had to be transferred out? What happened, and were there any issues with the radiation side of things?"' },
+            { speaker: "You", text: '"She developed a suspected PE and needed to go to the Royal for imaging. It\'s confirmed—she\'s being admitted there. The transfer went... mostly okay, though there was a contamination incident in the ambulance."' },
+            { speaker: "Ward Manager", text: '"I\'ve already had an email from the ambulance service asking about their exposure, and one from the Royal asking why we\'re \'sending them radioactive patients\'. We\'ll need to do some kind of incident review. What do you think were the main issues?"' }
+          ],
+          dialogueNote: "You're exhausted but you recognise this is an opportunity to improve things for next time. Your experience tonight highlighted several gaps.",
+          alerts: [
+            { label: "Systemic Issues Identified", text: "The emergency RPA number was buried in the SOP. The ambulance service had no protocol. The Royal's A&E and MAU were unprepared. Staff at multiple sites expressed anxiety about something that was ultimately manageable." },
+            { label: "Personal Reflection", text: "Your training was eighteen months old and patchy. You managed, but you were more uncertain than you'd have liked to be." }
+          ],
+          question: "What key learning points do you highlight for the incident review?",
+          options: [
+            { text: "Focus on what went wrong—the buried phone number, the staff anxiety, the MAU refusal—so we can fix the problems", feedback: "Identifies important issues, but a purely deficit-focused review can feel like blame. People who helped (Dr. Vance, Marcus, Tola) deserve recognition too." },
+            { text: "Emphasise that the clinical outcome was good—the patient got the care she needed and nobody was harmed by radiation", feedback: "True and important to acknowledge, but misses the opportunity to identify specific improvements. 'It worked out okay' isn't a reason not to do better." },
+            { text: "Present a balanced picture: Mrs. Nwosu got appropriate care, people stepped up despite uncertainty, but there are clear gaps—accessible emergency contacts, ambulance protocols, staff awareness, receiving hospital preparation", feedback: "Constructive approach that acknowledges what worked, credits those who helped, and identifies specific actionable improvements. Supports both learning and morale." },
+            { text: "Recommend that radioiodine patients should never be in the isolation ward without 24-hour physicist cover", feedback: "Might prevent a recurrence but is probably impractical and disproportionate for rare events. Proportionate improvements to information access and protocols are more realistic." }
+          ]
+        }
+      ],
+
+      discussionTopics: [
+        {
+          title: "Balancing Clinical Urgency and Radiation Protection",
+          questions: [
+            "At what point does clinical emergency override radiation precautions completely?",
+            "How do we ensure radiation awareness doesn't delay life-saving treatment?",
+            "What's the minimum information a non-specialist clinician needs in an emergency?"
+          ]
+        },
+        {
+          title: "Out-of-Hours Resources and Expertise",
+          questions: [
+            "How accessible was the emergency RPA number? How could this be improved?",
+            "What information does the on-call physicist need, and how do they get it quickly?",
+            "How do we maintain staff competence for rare but foreseeable events?"
+          ]
+        },
+        {
+          title: "Working with Incomplete Knowledge",
+          questions: [
+            "How did Gemma manage effectively despite her training being rusty?",
+            "When is it appropriate to say 'I don't know but I'll find out' versus giving your best guidance?",
+            "How do we build confidence to act under uncertainty?"
+          ]
+        },
+        {
+          title: "Managing Staff Anxiety",
+          questions: [
+            "How do we validate radiation concerns while providing reassurance?",
+            "What approaches worked to get staff to volunteer or cooperate?",
+            "How should refusal to provide care be handled?"
+          ]
+        },
+        {
+          title: "Inter-Department and Inter-Agency Coordination",
+          questions: [
+            "What information needs to flow between the ward, ambulance service, and receiving hospital?",
+            "How should the emergency RPA make contact when they don't know the receiving team?",
+            "What would help receiving wards feel more prepared for unfamiliar situations?"
+          ]
+        },
+        {
+          title: "Patient Experience",
+          questions: [
+            "How did Mrs. Nwosu likely experience this night?",
+            "What communication helped her feel cared for rather than hazardous?",
+            "How do we balance necessary precautions with compassionate, normal care?"
+          ]
+        },
+        {
+          title: "Contamination Management",
+          questions: [
+            "What's a proportionate response to low-level contamination events?",
+            "How do we balance thorough decontamination with operational impact?",
+            "What guidance should exist for ambulance crews and other non-specialist staff?"
+          ]
+        },
+        {
+          title: "System Improvements",
+          questions: [
+            "What protocol updates would help manage future incidents?",
+            "How do we make expert advice accessible without creating bottlenecks?",
+            "What regular exercises or refresher training would prepare staff for rare events?"
+          ]
+        }
+      ]
+    };
+
+    class ScenarioTraining {
+      constructor(config) {
+        this.config = config;
+        this.scenarios = config.scenarios;
+        this.currentStep = 0;
+        this.decisions = [];
+        this.startTime = Date.now();
+        this.selectedOption = null;
+
+        this.updatePageTitle();
+        this.displayCurrentScenario();
+      }
+
+      updatePageTitle() {
+        document.querySelector('.header h1').textContent = this.config.title;
+        document.querySelector('.header p').textContent = this.config.subtitle;
+        document.title = `${this.config.title} - Training Scenario`;
+      }
+
+      displayCurrentScenario() {
+        const scenario = this.scenarios[this.currentStep];
+        const content = document.getElementById('scenario-content');
+        const progressPercent = ((this.currentStep + 1) / this.scenarios.length) * 100;
+
+        let html = `
+          <div class="progress-container">
+            <div class="progress-label">
+              <span>Step ${this.currentStep + 1} of ${this.scenarios.length}</span>
+              <span>${Math.round(progressPercent)}% Complete</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${progressPercent}%"></div>
+            </div>
+          </div>
+          <div class="scenario-card">
+        `;
+
+        if (scenario.roleSwitch) {
+          html += `<div class="role-switch">Role Switch: You are now the ${scenario.role}</div>`;
+        } else {
+          html += `<div class="role-badge">${scenario.role}${scenario.context ? ' — ' + scenario.context : ''}</div>`;
+        }
+
+        html += `<h2 class="scenario-title">${scenario.title}</h2>`;
+        if (scenario.intro) html += `<div class="context-block">${scenario.intro}</div>`;
+
+        if (scenario.dialogue && scenario.dialogue.length > 0) {
+          html += `<div class="dialogue">`;
+          scenario.dialogue.forEach(line => {
+            html += `
+              <div class="dialogue-line">
+                <div class="dialogue-speaker">
+                  ${line.speaker}
+                  ${line.note ? ` <span style="font-weight: normal; color: var(--text-muted);">(${line.note})</span>` : ''}
+                </div>
+                ${line.text ? `<div class="dialogue-text">${line.text}</div>` : ''}
+              </div>
+            `;
+          });
+          if (scenario.dialogueNote) html += `<div class="dialogue-note">${scenario.dialogueNote}</div>`;
+          html += `</div>`;
+        }
+
+        if (scenario.alerts) scenario.alerts.forEach(alert => {
+          html += `<div class="alert-box"><strong>${alert.label}</strong>${alert.text}</div>`;
+        });
+
+        if (scenario.info) scenario.info.forEach(info => {
+          html += `<div class="info-box"><strong>${info.label}</strong>${info.text}</div>`;
+        });
+
+        html += `
+          <div class="question-section">
+            <h3 class="question-text">${scenario.question}</h3>
+            <div class="options-list">
+              ${scenario.options.map((option, index) => `
+                <div class="option" data-index="${index}" onclick="training.selectOption(${index})">
+                  <div class="option-label">Option ${index + 1}</div>
+                  ${option.text}
+                </div>
+              `).join('')}
+            </div>
+            <button class="btn" id="continue-btn" onclick="training.continueScenario()" disabled>Continue</button>
+            <button class="btn hidden" id="next-btn" onclick="training.nextScenario()">Next</button>
+          </div>
+        </div>
+        `;
+
+        content.innerHTML = html;
+
+        // Reset state for a fresh step:
+        this.selectedOption = null;
+        const continueBtn = document.getElementById('continue-btn');
+        const nextBtn = document.getElementById('next-btn');
+        if (continueBtn) {
+          continueBtn.disabled = true;
+          continueBtn.classList.remove('hidden');
+        }
+        if (nextBtn) nextBtn.classList.add('hidden');
+      }
+
+      selectOption(optionIndex) {
+        document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+        document.querySelectorAll('.option')[optionIndex].classList.add('selected');
+
+        this.selectedOption = optionIndex;
+
+        const continueBtn = document.getElementById('continue-btn');
+        if (continueBtn) continueBtn.disabled = false;
+      }
+
+      // IMPORTANT CHANGE:
+      // - No timers
+      // - After Continue, show feedback and STOP on this step
+      // - User must click Next to proceed
+      continueScenario() {
+        const scenario = this.scenarios[this.currentStep];
+
+        // Guard: must have a selection
+        if (this.selectedOption === null) return;
+
+        const selectedOption = scenario.options[this.selectedOption];
+
+        // Record decision
+        this.decisions.push({
+          step: this.currentStep + 1,
+          role: scenario.role,
+          scenario: scenario.title,
+          question: scenario.question,
+          choice: selectedOption.text,
+          feedback: selectedOption.feedback,
+          timestamp: new Date().toLocaleTimeString()
+        });
+
+        // Show feedback inline
+        const feedbackEl = this.showFeedback(selectedOption);
+
+        // Lock options after answering
+        document.querySelectorAll('.option').forEach(opt => {
+          opt.style.pointerEvents = 'none';
+          opt.style.opacity = '0.95';
+        });
+
+        // Swap buttons: hide Continue, show Next
+        const continueBtn = document.getElementById('continue-btn');
+        const nextBtn = document.getElementById('next-btn');
+        if (continueBtn) continueBtn.classList.add('hidden');
+        if (nextBtn) {
+          nextBtn.classList.remove('hidden');
+          nextBtn.focus(); // optional UX improvement
+        }
+
+        // Scroll feedback into view (optional but helpful)
+        if (feedbackEl) {
+          feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+
+      nextScenario() {
+        this.currentStep++;
+        this.selectedOption = null;
+
+        if (this.currentStep < this.scenarios.length) {
+          this.displayCurrentScenario();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          this.showReview();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+
+      showFeedback(option) {
+        const questionSection = document.querySelector('.question-section');
+
+        // Safety: prevent duplicate feedback if Continue is somehow triggered twice
+        const existing = questionSection.querySelector('.feedback-inline');
+        if (existing) return existing;
+
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.className = 'feedback-inline';
+        feedbackDiv.innerHTML = `
+          <strong>Approach</strong>
+          <p style="margin-top: 8px;">${option.feedback}</p>
+        `;
+
+        questionSection.appendChild(feedbackDiv);
+
+        // Disable Continue after showing feedback (extra safety)
+        const continueBtn = document.getElementById('continue-btn');
+        if (continueBtn) continueBtn.disabled = true;
+
+        return feedbackDiv;
+      }
+
+      showReview() {
+        document.getElementById('scenario-content').classList.add('hidden');
+        const reviewSection = document.getElementById('review-section');
+        reviewSection.classList.remove('hidden');
+
+        const totalTime = Math.round((Date.now() - this.startTime) / 1000 / 60);
+        const roles = [...new Set(this.decisions.map(d => d.role))].join(', ');
+
+        let html = `
+          <h2 class="review-title">Scenario Complete</h2>
+          <p class="review-subtitle">Review your decisions and discuss with your team</p>
+          <div class="review-meta">
+            <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
+            <span><strong>Duration:</strong> ${totalTime} minutes</span>
+            <span><strong>Roles:</strong> ${roles}</span>
+          </div>
+          <h3 style="font-family: var(--font-heading); margin-bottom: 16px;">Your Decisions</h3>
+        `;
+
+        this.decisions.forEach((decision, index) => {
+          html += `
+            <div class="decision-card">
+              <h4>Step ${index + 1} • ${decision.role}</h4>
+              <h3>${decision.scenario}</h3>
+              <p class="decision-detail"><strong>Situation:</strong> ${decision.question}</p>
+              <p class="decision-detail"><strong>Your choice:</strong> ${decision.choice}</p>
+              <p class="decision-detail"><strong>Approach:</strong> ${decision.feedback}</p>
+            </div>
+          `;
+        });
+
+        if (this.config.discussionTopics && this.config.discussionTopics.length > 0) {
+          html += `<div class="discussion-section"><h3>Discussion Points for Team Review</h3>`;
+          this.config.discussionTopics.forEach(topic => {
+            html += `
+              <div class="discussion-topic">
+                <h4>${topic.title}</h4>
+                <ul>${topic.questions.map(q => `<li>${q}</li>`).join('')}</ul>
+              </div>
+            `;
+          });
+          html += `</div>`;
+        }
+
+        html += `
+          <div class="button-group">
+            <button class="btn" onclick="window.print()">Print Summary</button>
+            <button class="btn btn-secondary" onclick="training.restart()">Run Again</button>
+          </div>
+        `;
+
+        reviewSection.innerHTML = html;
+      }
+
+      restart() {
+        document.getElementById('scenario-content').classList.remove('hidden');
+        document.getElementById('review-section').classList.add('hidden');
+
+        this.currentStep = 0;
+        this.decisions = [];
+        this.selectedOption = null;
+        this.startTime = Date.now();
+
+        this.displayCurrentScenario();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    let training;
+    window.onload = function() {
+      training = new ScenarioTraining(SCENARIO_CONFIG);
+    };
+  </script>
+</body>
+</html>
